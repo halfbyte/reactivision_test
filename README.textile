@@ -1,0 +1,28 @@
+h1. reacTIVision playground
+
+A playground for experiments based on reacTIVision.
+
+Done by Jan Krutisch / a maeshroom.de project
+
+h2. Requirements
+
+* gosu (see "the google.code page for information on how to install gosu":http://code.google.com/p/gosu/)
+* "reacTIVision":http://reactable.iua.upf.edu/?software (obviously)
+
+h2. Use it
+
+  > ruby test.rb 
+  
+This should startup a gosu window with a colourful dot following the fiducial marker #0
+
+(raw_test.rb is just quick hack to be able to debug the OSC lib)
+
+h2. Notes
+
+* if you are using a bad webcam (such as a built-in iSight) for tracking the markers, prepare for hangups and glitches, since the tracking is not always working reliably under these conditions. Webcams tend to blur the image in case of fast movements which makes it quite impossible for reacTIVision to track the markers. Press v on the reacTIVision window to see the markers displayed in the reacTIVision trace.
+* I had to patch the osc library which seems to have a bug that affects bundle decoding.
+
+h2. Todo
+
+* implement marker rotation detection
+* implement multiple markers
