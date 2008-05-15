@@ -14,23 +14,39 @@ SCREEN_HEIGHT=480
 $objects = {}
 $object = nil
 
+class Numeric
+  def gosu_to_radians
+    (self - 90) * Math::PI / 180.0
+  end
+  
+  def radians_to_gosu
+    self * 180.0 / Math::PI + 90
+  end
+  
+  def radians_to_vec2
+    CP::Vec2.new(Math::cos(self), Math::sin(self))
+  end
+end
+
+
 class Marker
   def initialize(window)
-    @x, @y = 0,0
+    @x, @y, @a = 0,0,0
     @image = Image.new(window, 'media/point.png', true)
     @mutex = Mutex.new
   end
   
-  def set(x,y)
+  def set(x,y, a)
     @mutex.synchronize do
-      @x = SCREEN_WIDTH - (x*SCREEN_WIDTH)
-      @y = y*SCREEN_HEIGHT
+      @x = x * SCREEN_WIDTH
+      @y = y * SCREEN_HEIGHT
+      @a = a
     end
   end
   
   def draw
     @mutex.synchronize do
-      @image.draw(@x, @y,1)
+      @image.draw_rot(@x, @y, 1, (@a + (Math::PI / 2)).radians_to_gosu )
     end
   end
   
@@ -75,7 +91,7 @@ s.add_method '/tuio/2Dobj', nil do |msg|
   
   if msg.args[0].to_s == 'set' && msg.args[2].to_i == 0
     # puts "#{msg.inspect}"
-    marker.set(msg.args[3].to_f, msg.args[4].to_f) 
+    marker.set(msg.args[3].to_f, msg.args[4].to_f, msg.args[5]) 
   end 
 end
 
