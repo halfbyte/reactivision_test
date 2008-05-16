@@ -34,19 +34,33 @@ class Marker
     @x, @y, @a = 0,0,0
     @image = Image.new(window, 'media/point.png', true)
     @mutex = Mutex.new
+    @x_a = 0
+    @y_a = 0
+    @a_a = 0
   end
   
-  def set(x,y, a)
+  def set(x,y, a, x_a=0, y_a=0, a_a=0)
     @mutex.synchronize do
       @x = x * SCREEN_WIDTH
       @y = y * SCREEN_HEIGHT
       @a = a
+      @x_a = x_a
+      @y_a = y_a
+      @a_a = a_a
     end
   end
   
   def draw
     @mutex.synchronize do
       @image.draw_rot(@x, @y, 1, (@a + (Math::PI / 2)).radians_to_gosu )
+    end
+  end
+  
+  def update
+    @mutex.synchronize do
+      @x += @x_a
+      @y += @y_a
+      @a += @a_a
     end
   end
   
@@ -74,6 +88,7 @@ class GameWindow < Window
   end
 
   def update
+    @marker.update if @marker
     Thread.pass
   end
   
@@ -90,8 +105,8 @@ s.bind 'localhost', 3333
 s.add_method '/tuio/2Dobj', nil do |msg|
   
   if msg.args[0].to_s == 'set' && msg.args[2].to_i == 0
-    # puts "#{msg.inspect}"
-    marker.set(msg.args[3].to_f, msg.args[4].to_f, msg.args[5]) 
+    puts "#{msg.inspect}"
+    marker.set(msg.args[3].to_f, msg.args[4].to_f, msg.args[5], msg.args[6].to_f, msg.args[7].to_f, msg.args[8]) 
   end 
 end
 
