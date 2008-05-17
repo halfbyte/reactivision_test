@@ -1,13 +1,13 @@
 require 'rubygems'
 $:.unshift('lib')
-require 'gosu'
-require 'osc'
 
-include  OSC
+require 'gosu'
+require 'reactivision'
+
 include  Gosu
-PORT = 3333
-SCREEN_WIDTH=640
-SCREEN_HEIGHT=480
+
+SCREEN_WIDTH=800
+SCREEN_HEIGHT=600
 
 # mutex = Mutex.new
 
@@ -28,44 +28,6 @@ class Numeric
   end
 end
 
-
-class Marker
-  def initialize(window)
-    @x, @y, @a = 0,0,0
-    @image = Image.new(window, 'media/point.png', true)
-    @mutex = Mutex.new
-    @x_a = 0
-    @y_a = 0
-    @a_a = 0
-  end
-  
-  def set(x,y, a, x_a=0, y_a=0, a_a=0)
-    @mutex.synchronize do
-      @x = x * SCREEN_WIDTH
-      @y = y * SCREEN_HEIGHT
-      @a = a
-      @x_a = x_a
-      @y_a = y_a
-      @a_a = a_a
-    end
-  end
-  
-  def draw
-    @mutex.synchronize do
-      @image.draw_rot(@x, @y, 1, (@a + (Math::PI / 2)).radians_to_gosu )
-    end
-  end
-  
-  def update
-    @mutex.synchronize do
-      @x += @x_a
-      @y += @y_a
-      @a += @a_a
-    end
-  end
-  
-end
-
 class GameWindow < Window
   attr_accessor :marker
   def initialize
@@ -74,10 +36,25 @@ class GameWindow < Window
     @x = 0
     @y = 0
     @background_image = Image.new(self, 'media/background.png', true)
+    @marker = Image.new(self, 'media/point.png', true)
+    @cursor = Image.new(self, 'media/cursor.png', true)
+    @ra_server = Reactivision::Server.new
+    @font = Font.new(self,"Monaco", 20)
   end
   def draw
-    @background_image.draw(0,0,0)
-    @marker.draw if @marker
+    #@background_image.draw(0,0,0)
+    
+    @ra_server.markers.each do |id, marker|
+      @marker.draw_rot(marker.x * SCREEN_WIDTH, marker.y * SCREEN_HEIGHT, 1, (marker.a + (Math::PI / 2)).radians_to_gosu )
+      @font.draw("#{marker.symbol}", marker.x* SCREEN_WIDTH, marker.y * SCREEN_HEIGHT, 2, 1.0, 1.0, 0xff0000ff)
+    end
+    
+    @ra_server.cursors.each do |id, cursor|
+      @cursor.draw_rot(cursor.x * SCREEN_WIDTH, cursor.y * SCREEN_HEIGHT, 2, 0)
+    end
+    
+    
+    #@marker.draw if @marker
   end
   
   def button_down(id)
@@ -88,35 +65,10 @@ class GameWindow < Window
   end
 
   def update
-    @marker.update if @marker
     Thread.pass
   end
   
 end
 
 window = GameWindow.new
-marker = Marker.new(window)
-window.marker = marker
-
-s = OSC::UDPServer.new
-s.bind 'localhost', 3333
-
-
-s.add_method '/tuio/2Dobj', nil do |msg|
-  
-  if msg.args[0].to_s == 'set' && msg.args[2].to_i == 0
-    puts "#{msg.inspect}"
-    marker.set(msg.args[3].to_f, msg.args[4].to_f, msg.args[5], msg.args[6].to_f, msg.args[7].to_f, msg.args[8]) 
-  end 
-end
-
-Thread.new do
-  puts "setup server"
-  begin
-    s.serve
-  rescue
-    puts "tore down"
-  end
-end
 window.show
-# th.join
