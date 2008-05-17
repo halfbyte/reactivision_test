@@ -8,12 +8,13 @@ h2. Requirements
 
 * gosu (see "the google.code page for information on how to install gosu":http://code.google.com/p/gosu/)
 * "reacTIVision":http://reactable.iua.upf.edu/?software (obviously)
+* (probably useful: The reactivision sim available at the same site)
 
 h2. Use it
 
   > ruby test.rb 
   
-This should startup a gosu window with a colourful dot following the fiducial marker #0
+This should startup a gosu window that shows cursors and markers if present.
 
 (raw_test.rb is just quick hack to be able to debug the OSC lib)
 
@@ -24,5 +25,4 @@ h2. Notes
 
 h2. Todo
 
-* implement marker rotation detection
-* implement multiple markers
+* Do something useful with it. Currently the biggest problem is to setup the hardware, though.
