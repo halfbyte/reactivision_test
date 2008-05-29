@@ -1,0 +1,10 @@
+--- /Users/jankrutisch/Downloads/rosc-0.1-1.2/lib/osc.rb	2008-02-15 16:19:12.000000000 +0100
++++ lib/osc.rb	2008-04-30 18:40:39.000000000 +0200
+@@ -166,6 +166,7 @@
+     alias :messages :args
+     alias :contents :args
+     alias :to_a :args
++    attr_accessor :source
+ 
+     # New bundle with time and messages
+     def initialize(t=nil, *args)
